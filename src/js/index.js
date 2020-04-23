@@ -12,7 +12,8 @@ const state = {};
 /* Search Controller */
 const controlSearch = async () => {
   //1) get a query from view
-  const query = searchView.getInput();
+  // const query = searchView.getInput();
+  const query = 'pizza';
 
   if (query) {
     //2) New search object and add to state
@@ -29,6 +30,7 @@ const controlSearch = async () => {
       //5) render results on UI
       clearLoader();
       searchView.renderResults(state.search.result);
+      
     } catch(err){
       alert('Something wrong with the search...');
       clearLoader();
@@ -42,9 +44,18 @@ elements.searchForm.addEventListener('submit', e => {
   controlSearch();
 });
 
+//for testing
+window.addEventListener('load', e => {
+  e.preventDefault();
+  controlSearch();
+});
+
+//element.closest() returns the closest ancestor of the current
+//element (or the current element itself)
 elements.searchResPages.addEventListener('click', e => {
   const btn = e.target.closest('.btn-inline');
   if(btn) {
+    //'dataset.goto' reads 'data-goto'
     const gotoPage = parseInt(btn.dataset.goto, 10);
     searchView.clearResults();
     searchView.renderResults(state.search.result, gotoPage);
@@ -57,7 +68,7 @@ elements.searchResPages.addEventListener('click', e => {
 const controlRecipe = async () => {
 
   //window.location is the entire url
-  //Get ID from url
+  //Get ID from url - window.location.hash
   const id = window.location.hash.replace('#', '');
   console.log(id);
 
@@ -66,6 +77,9 @@ const controlRecipe = async () => {
 
     // Create new recipe object
     state.recipe = new Recipe(id);
+   
+    // testing
+    window.r = state.recipe;
 
     try{
       // Get recipe data

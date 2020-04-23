@@ -8,7 +8,9 @@ export const clearInput = () => elements.searchInput.value = '';
 
 //clear previous results
 export const clearResults = () => {
+  //clear the results
   elements.searchResList.innerHTML = '';
+  //clear the buttons
   elements.searchResPages.innerHTML = '';
 };
 
@@ -28,7 +30,7 @@ const limitRecipeTitle = (title, limit = 17) => {
   } 
     return title;
 };
-5
+
 //render recipe on UI
 const renderRecipe = recipe => {
   const markup = `
@@ -49,7 +51,9 @@ const renderRecipe = recipe => {
   elements.searchResList.insertAdjacentHTML('beforeend', markup);
 };
 
-//type: 'prev' or 'next'
+// create button for results
+// type: 'prev' or 'next'
+// data-goto: HTML5 feature that can be read by dataset.goto
 const createButton = (page, type) => `
     <button class="btn-inline results__btn--${type}" data-goto = ${type === 'prev' ? page - 1 : page + 1} >
         <svg class="search__icon">
@@ -59,20 +63,25 @@ const createButton = (page, type) => `
      </button>
 `;
 
-//render buttons
+//render forward and backward buttons on results column
 const renderButton = (page, numResults, resPerPage) => {
   const pages = Math.ceil(numResults / resPerPage);
-  
   let button;
+
+  //on 1st page
   if(page === 1 && pages > 1) {
     //button to go to next page
     button = createButton(page, 'next');
+
+  // between page 2 to penultimate page
   } else if( page < pages){
-    //Both buttons
+    //Buttons to go backward and forward
     button = `
       ${createButton(page, 'prev')}
       ${createButton(page, 'next')}
     `;
+
+  // on last page
   } else if( page === pages && pages > 1){
     // only button to go to prev page
     button = createButton(page, 'prev');
@@ -84,7 +93,10 @@ const renderButton = (page, numResults, resPerPage) => {
 
 export const renderResults = (recipes, page = 1, resPerPage = 10) => {
   //render results of current page
-  const start = (page - 1) * resPerPage;
+  // page 1 = 0; page 2 = resPerPage = 10, page 3 = 2 * resPerPage = 20
+  // starts every resPerPage or 10th, with the first page starts 0
+  // ends every resPerpage or 10th
+  const start = (page - 1) * resPerPage;    
   const end = page * resPerPage; 
 
   recipes.slice(start, end).forEach(renderRecipe);
