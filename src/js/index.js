@@ -3,14 +3,17 @@ import { elements, renderLoader, clearLoader } from "./views/base";
 import * as searchView from "./views/searchView";
 import * as recipeView from "./views/recipeView";
 import * as listView from "./views/listView";
+import * as likesView from "./views/likesView";
 import Recipe from "./models/Recipe";
 import List from "./models/List";
+import Likes from "./models/Likes";
 // global state of the app
 // - search object
 // - current recipe object
 // - shopping list object
 // - liked recipes
 const state = {};
+window.state = state;
 
 /* Search Controller */
 const controlSearch = async () => {
@@ -59,6 +62,7 @@ elements.searchResPages.addEventListener("click", (e) => {
 /*
   Recipe Controller
 */
+
 const controlRecipe = async () => {
 	//window.location is the entire url
 	//Get ID from url - window.location.hash
@@ -88,7 +92,7 @@ const controlRecipe = async () => {
 
 			// render recipe
 			clearLoader();
-			recipeView.renderRecipe(state.recipe);
+			recipeView.renderRecipe(state.recipe, state.likes.isLiked(id));
 		} catch (err) {
 			console.log("Error processing recipe!");
 		}
@@ -114,6 +118,63 @@ const controlList = () => {
 	});
 };
 
+// handle delete and update shopping cart items events
+elements.shopping.addEventListener("click", (e) => {
+	//read the id from the closest element
+	const id = e.target.closest(".shopping__item").dataset.itemid;
+
+	//handle the delete button
+	if (e.target.matches(".shopping__delete, .shopping__delete *")) {
+		// deelete from state
+		state.list.deleteItem(id);
+
+		// delete from UI
+		listView.deleteItem(id);
+
+		//update shopping cart count
+	} else if (e.target.matches(".shopping__count-value")) {
+		const val = parseFloat(e.target.value, 10);
+		state.list.updateCount(id, val);
+	}
+});
+
+/*
+  Like Controller
+*/
+state.likes = new Likes();
+likesView.toggleLikeMenu(state.likes.getNumLikes());
+
+const controlLike = () => {
+	if (!state.likes) state.likes = new Likes();
+	const currentId = state.recipe.id;
+
+	// user has not liked current recipe
+	if (!state.likes.isLiked(currentId)) {
+		// And like to the state
+		const newLike = state.likes.addLike(
+			currentId,
+			state.recipe.title,
+			state.recipe.author,
+			state.recipe.img
+		);
+		// Toggle the like button
+		likesView.toggleLikeBtn(true);
+
+		// Add like to UI list
+    likesView.renderLike(newLike);
+    
+		// user has liked current recipe
+	} else {
+		// remove like from the state
+		state.likes.deleteLike(currentId);
+		// Toggle the like button
+		likesView.toggleLikeBtn(false);
+		// remove like from UI list
+		likesView.deleteLike(currentId);
+	}
+	likesView.toggleLikeMenu(state.likes.getNumLikes());
+};
+
 // handling recipe serving button clicks : increase/decrease servings
 elements.recipe.addEventListener("click", (e) => {
 	// * universal selector for child elements
@@ -131,6 +192,9 @@ elements.recipe.addEventListener("click", (e) => {
 		// add items to shopping cart
 	} else if (e.target.matches(".recipe__btn--add, .recipe__btn--add *")) {
 		controlList();
+	} else if (e.target.matches(".recipe__love, .recipe__love *")) {
+		// Like controller
+		controlLike();
 	}
 });
 

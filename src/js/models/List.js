@@ -18,7 +18,7 @@ export default class List {
 
 	deleteItem(id) {
 		const index = this.items.findIndex((el) => el.id === id);
-		this.item.splice(index, 1);
+		this.items.splice(index, 1);
 	}
 
 	//update the count in the shopping cart
